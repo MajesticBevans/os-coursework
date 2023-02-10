@@ -1,0 +1,37 @@
+/mnt/c/Users/barev/Desktop/infos-coursework/infos/oot/buddy.o: \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/oot/buddy.cpp \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/mm/page-allocator.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/mm/allocator.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/define.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/assert.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/log.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/lock.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/arch/x86/irq.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/irq.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/mm/mm.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/subsystem.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/mm/object-allocator.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/kernel.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/om.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/object.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/map.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/list.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/support.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/device-manager.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/drivers/device.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/string.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/generator.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/module.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/sched.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/sched-entity.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/time.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/ratio.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/event.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/wakequeue.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/kernel/syscall.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/fs/vfs.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/fs/vfs-node.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/fs/fs-node.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/cmdline.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/math.h \
+ /mnt/c/Users/barev/Desktop/infos-coursework/infos/include/infos/util/printf.h
