@@ -29,14 +29,7 @@ public:
      */
     void init()
     {
-        List<SchedulingEntity *> real_entities;
-        List<SchedulingEntity *> interactive_entities;
-        List<SchedulingEntity *> normal_entities;
-        List<SchedulingEntity *> daemon_entities;
-        runqueues.add(SchedulingEntityPriority::REALTIME, real_entities);
-        runqueues.add(SchedulingEntityPriority::INTERACTIVE, interactive_entities);
-        runqueues.add(SchedulingEntityPriority::NORMAL, normal_entities);
-        runqueues.add(SchedulingEntityPriority::DAEMON, daemon_entities);
+        // Meh?
     }
 
     /**
@@ -46,64 +39,22 @@ public:
     void add_to_runqueue(SchedulingEntity& entity) override
     {
         UniqueIRQLock l;
-        List<SchedulingEntity *> runqueue;
-
         switch (entity.priority())
         {
             case SchedulingEntityPriority::REALTIME:
-                if (runqueues.try_get_value(SchedulingEntityPriority::REALTIME, runqueue))
-                {
-                    runqueue.enqueue(&entity);
-
-                    runqueues.remove(SchedulingEntityPriority::REALTIME);
-                    runqueues.add(SchedulingEntityPriority::REALTIME, runqueue);
-                }
-                else
-                {
-                    syslog.messagef(LogLevel::DEBUG, "Missing runqueue");
-                }
+                runqueues[SchedulingEntityPriority::REALTIME].enqueue(&entity);
                 break;
             
             case SchedulingEntityPriority::INTERACTIVE:
-                if (runqueues.try_get_value(SchedulingEntityPriority::INTERACTIVE, runqueue))
-                {
-                    runqueue.enqueue(&entity);
-
-                    runqueues.remove(SchedulingEntityPriority::INTERACTIVE);
-                    runqueues.add(SchedulingEntityPriority::INTERACTIVE, runqueue);
-                }
-                else
-                {
-                    syslog.messagef(LogLevel::DEBUG, "Missing runqueue");
-                }
+                runqueues[SchedulingEntityPriority::INTERACTIVE].enqueue(&entity);
                 break;
 
             case SchedulingEntityPriority::NORMAL:
-                if (runqueues.try_get_value(SchedulingEntityPriority::NORMAL, runqueue))
-                {
-                    runqueue.enqueue(&entity);
-
-                    runqueues.remove(SchedulingEntityPriority::NORMAL);
-                    runqueues.add(SchedulingEntityPriority::NORMAL, runqueue);
-                }
-                else
-                {
-                    syslog.messagef(LogLevel::DEBUG, "Missing runqueue");
-                }
+                runqueues[SchedulingEntityPriority::NORMAL].enqueue(&entity);
                 break;
 
             case SchedulingEntityPriority::DAEMON:
-                if (runqueues.try_get_value(SchedulingEntityPriority::DAEMON, runqueue))
-                {
-                    runqueue.enqueue(&entity);
-
-                    runqueues.remove(SchedulingEntityPriority::DAEMON);
-                    runqueues.add(SchedulingEntityPriority::DAEMON, runqueue);
-                }
-                else
-                {
-                    syslog.messagef(LogLevel::DEBUG, "Missing runqueue");
-                }
+                runqueues[SchedulingEntityPriority::DAEMON].enqueue(&entity);
                 break;
             
             default:
@@ -119,26 +70,16 @@ public:
     void remove_from_runqueue(SchedulingEntity& entity) override
     {
         UniqueIRQLock l;
-        List<SchedulingEntity *> runqueue;
+        List<SchedulingEntity *> * runqueue;
         unsigned int pre;
 
         for (int i = 0; i < 4; i++)
         {
-            if (runqueues.try_get_value(i, runqueue))
-            {
-                pre = runqueue.count();
-                runqueue.remove(&entity);
-                if (runqueue.count() < pre) 
-                { 
-                    runqueues.remove(i);
-                    runqueues.add(i, runqueue);
-                    return; 
-                }
-            }
-            else
-            {
-                syslog.messagef(LogLevel::DEBUG, "Missing runqueue");
-            }
+            runqueue = &runqueues[i];
+           
+            pre = runqueue->count();
+            runqueue->remove(&entity);
+            if (runqueue->count() < pre) { return; }
         }
     }
 
@@ -149,37 +90,30 @@ public:
      */
     SchedulingEntity *pick_next_entity() override
     {
-        List<SchedulingEntity *> runqueue;
+        List<SchedulingEntity *> * runqueue;
 
         for (int i = 0; i < 4; i++)
         {
-            if (runqueues.try_get_value(i, runqueue))
+            runqueue = &runqueues[i];
+
+            if (runqueue->empty())
             {
-                if (runqueue.empty())
-                {
-                    if (i < 4) { continue; }
-                    else { return NULL; }
-                }
-                if (runqueue.count() == 1) { return runqueue.first(); }
-
-                SchedulingEntity *next = runqueue.pop();
-                runqueue.enqueue(next);
-
-                runqueues.remove(i);
-                runqueues.add(i, runqueue);
-
-                return next;
+                if (i < 4) { continue; }
+                else { return NULL; }
             }
-            else
-            {
-                syslog.messagef(LogLevel::DEBUG, "Missing runqueue");
-            }
+
+            if (runqueue->count() == 1) { return runqueue->first(); }
+
+            SchedulingEntity *next = runqueue->pop();
+            runqueue->enqueue(next);
+            syslog.messagef(LogLevel::DEBUG, "Runqueue top and bottom: %d -> %d", runqueue->first(), runqueue->last());
+            return next;
         }
         return NULL;
     }
 
 private:
-    Map<int, List<SchedulingEntity *>> runqueues;
+    List<SchedulingEntity *> runqueues[4];
 };
 
 /* --- DO NOT CHANGE ANYTHING BELOW THIS LINE --- */
