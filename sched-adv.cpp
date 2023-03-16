@@ -16,13 +16,13 @@ using namespace infos::util;
 /**
  * A Multiple Queue priority scheduling algorithm
  */
-class MultipleQueuePriorityScheduler : public SchedulingAlgorithm
+class AdvancedMultipleQueuePriorityScheduler : public SchedulingAlgorithm
 {
 public:
     /**
      * Returns the friendly name of the algorithm, for debugging and selection purposes.
      */
-    const char* name() const override { return "mq"; }
+    const char* name() const override { return "adv"; }
 
     /**
      * Called during scheduler initialisation.
@@ -91,30 +91,88 @@ public:
     SchedulingEntity *pick_next_entity() override
     {
         List<SchedulingEntity *> * runqueue;
+        bool looped = false;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < priority_levels_count; i++)
         {
+            // skip priority level if max consecutive slices reached
+            if (consecutive_counts[i] >= consecutive_maxs[i])
+            {
+                continue;
+            }
             runqueue = &runqueues[i];
 
             if (runqueue->empty())
             {
-                if (i < 3) { continue; }
-                else { return NULL; }
+                // if not lowest priority, reset consecutive and continue
+                if (i < SchedulingEntityPriority::DAEMON) 
+                { 
+                    consecutive_counts[i] = 0;
+                    continue; 
+                }
+                else 
+                { 
+                    // looped ensures that if there is a thread to be run, it is run
+                    if (looped) { return NULL; }
+                    else
+                    {
+                        reset_consecutive_counts();
+                        i = -1;
+                        looped = true;
+                        continue;
+                    }
+                }
             }
 
-            if (runqueue->count() == 1) { return runqueue->first(); }
+            if (runqueue->count() == 1) 
+            { 
+                consecutive_counts[i]++;
+                // reset all if all consecutive counts maxed out
+                if (consecutive_counts[SchedulingEntityPriority::DAEMON] >= consecutive_maxs[SchedulingEntityPriority::DAEMON]) 
+                { 
+                    reset_consecutive_counts();
+                }
+                return runqueue->first(); 
+            }
 
-            SchedulingEntity *next = runqueue->pop();
-            runqueue->enqueue(next);
-            return next;
+            //cfs algorithm
+            SchedulingEntity::EntityRuntime min_runtime = 0;
+            SchedulingEntity *min_runtime_entity = NULL;
+
+            for (const auto& entity : *runqueue) {
+                if (min_runtime_entity == NULL || entity->cpu_runtime() < min_runtime) {
+                    min_runtime_entity = entity;
+                    min_runtime = entity->cpu_runtime();
+                }
+            }
+            consecutive_counts[i]++;
+
+            // reset all if all consecutive counts maxed out
+            if (consecutive_counts[SchedulingEntityPriority::DAEMON] >= consecutive_maxs[SchedulingEntityPriority::DAEMON]) 
+            { 
+                reset_consecutive_counts();
+            }
+
+            return min_runtime_entity;
         }
         return NULL;
     }
 
 private:
+    const int priority_levels_count = 4;
     List<SchedulingEntity *> runqueues[4];
+    int consecutive_counts[4] = {0,0,0,0};
+    int consecutive_maxs[4] = {4,3,2,1};
+    
+    void reset_consecutive_counts()
+    {
+        consecutive_counts[0] = 0;
+        consecutive_counts[1] = 0;
+        consecutive_counts[2] = 0;
+        consecutive_counts[3] = 0;
+    }
 };
 
 /* --- DO NOT CHANGE ANYTHING BELOW THIS LINE --- */
 
-RegisterScheduler(MultipleQueuePriorityScheduler);
+RegisterScheduler(AdvancedMultipleQueuePriorityScheduler);
